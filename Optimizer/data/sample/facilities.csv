@@ -1,0 +1,11 @@
+facility_code,name,facility_type,district,state,is_active
+H01,Central District Hospital,DISTRICT_HOSPITAL,Lucknow,Uttar Pradesh,True
+H02,City Hospital,DISTRICT_HOSPITAL,Lucknow,Uttar Pradesh,True
+H03,North Community Health Centre,COMMUNITY_HEALTH_CENTRE,Lucknow,Uttar Pradesh,True
+H04,Riverside Hospital,DISTRICT_HOSPITAL,Barabanki,Uttar Pradesh,True
+H05,East Community Health Centre,COMMUNITY_HEALTH_CENTRE,Barabanki,Uttar Pradesh,True
+H06,Regional Medical Centre,DISTRICT_HOSPITAL,Unnao,Uttar Pradesh,True
+H07,South Primary Health Centre,PRIMARY_HEALTH_CENTRE,Unnao,Uttar Pradesh,True
+H08,West Community Health Centre,COMMUNITY_HEALTH_CENTRE,Sitapur,Uttar Pradesh,True
+H09,District Outreach Hospital,DISTRICT_HOSPITAL,Sitapur,Uttar Pradesh,True
+H10,Community Hospital,COMMUNITY_HEALTH_CENTRE,Hardoi,Uttar Pradesh,True

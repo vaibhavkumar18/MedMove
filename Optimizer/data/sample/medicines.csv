@@ -1,0 +1,5 @@
+medicine_code,generic_name,strength,dosage_form,base_unit,is_active
+MED1,Paracetamol,500 mg,tablet,tablet,True
+MED2,Oral Rehydration Salts,WHO formula,sachet,sachet,True
+MED3,Amoxicillin,250 mg,capsule,capsule,True
+MED4,Zinc Sulphate,20 mg,tablet,tablet,True

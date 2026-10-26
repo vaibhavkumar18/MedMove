@@ -1,0 +1,5 @@
+medicine_code,generic_name,strength,dosage_form,base_unit,is_active
+MED1,Paracetamol,500mg,Tablet,tab,true
+MED2,Amoxicillin,250mg,Capsule,cap,true
+MED3,Salbutamol,100mcg,Inhaler,puff,true
+MED4,ORS,21g,Sachet,sachet,true

@@ -1,0 +1,44 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyd
+*.egg-info/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Python tooling
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+build/
+dist/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+Project_Context/

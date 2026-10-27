@@ -1,0 +1,11 @@
+facility_code,name,facility_type,district,state,is_active
+H01,District Hospital Central,CENTRAL,District A,State X,true
+H02,District Hospital East,EAST,District B,State X,true
+H03,District Hospital West,WEST,District C,State X,true
+H04,District Hospital North,NORTH,District D,State Y,true
+H05,District Hospital South,SOUTH,District E,State Y,true
+H06,Regional Medical Center 1,REGIONAL,District F,State Z,true
+H07,Regional Medical Center 2,REGIONAL,District G,State Z,true
+H08,Community Health Center 1,COMMUNITY,District H,State X,true
+H09,Community Health Center 2,COMMUNITY,District I,State Y,true
+H10,Community Health Center 3,COMMUNITY,District J,State Z,true

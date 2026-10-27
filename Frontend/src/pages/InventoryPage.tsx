@@ -14,44 +14,14 @@ import { Navigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppSelector } from '../hooks/useAppSelector';
+import { useInventory } from '../hooks/useInventory';
+import type { InventoryBatch } from '../types/contracts';
 import InventoryTable, {
-  type InventoryBatchRow,
   type InventoryQuality,
 } from '../components/InventoryTable';
 import InventoryBatchForm from '../components/InventoryBatchForm';
 
-type Medicine = {
-  medicine_code: string;
-  generic_name: string;
-  strength: string;
-};
-
-type Facility = {
-  facility_code: string;
-  name: string;
-};
-
-const STORAGE_KEY = 'medmove_demo_inventory_v1';
-
-const facilities: Facility[] = [
-  { facility_code: 'H01', name: 'City General Hospital' },
-  { facility_code: 'H02', name: 'Riverside Medical Centre' },
-  { facility_code: 'H03', name: 'Central District Hospital' },
-  { facility_code: 'H04', name: 'Green Valley Hospital' },
-  { facility_code: 'H05', name: 'Sunrise Community Hospital' },
-  { facility_code: 'H06', name: 'Northside Medical Centre' },
-  { facility_code: 'H07', name: 'Unity Care Hospital' },
-  { facility_code: 'H08', name: 'Lakeside General Hospital' },
-  { facility_code: 'H09', name: 'Hopewell Medical Centre' },
-  { facility_code: 'H10', name: 'West End District Hospital' },
-];
-
-const medicines: Medicine[] = [
-  { medicine_code: 'MED001', generic_name: 'Paracetamol', strength: '500 mg' },
-  { medicine_code: 'MED002', generic_name: 'Amoxicillin', strength: '250 mg' },
-  { medicine_code: 'MED003', generic_name: 'ORS', strength: 'WHO formula' },
-  { medicine_code: 'MED004', generic_name: 'Cetirizine', strength: '10 mg' },
-];
+type DemoBatch = InventoryBatch;
 
 const qualityOptions: InventoryQuality[] = [
   'ELIGIBLE',
@@ -59,90 +29,6 @@ const qualityOptions: InventoryQuality[] = [
   'RECALLED',
   'DAMAGED',
 ];
-
-type DemoBatch = InventoryBatchRow;
-
-function dateFromToday(days: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0'),
-  ].join('-');
-}
-
-function createInitialBatches(): DemoBatch[] {
-  const seed = [
-    ['H01', 'MED001', 'LOT-101', 420, 1200, 'ELIGIBLE'],
-    ['H01', 'MED002', 'LOT-102', 160, 450, 'ELIGIBLE'],
-    ['H02', 'MED001', 'LOT-201', 250, 720, 'ELIGIBLE'],
-    ['H02', 'MED003', 'LOT-202', 24, 150, 'ELIGIBLE'],
-    ['H02', 'MED004', 'LOT-203', 12, 80, 'ELIGIBLE'],
-    ['H03', 'MED001', 'LOT-301', 310, 180, 'ELIGIBLE'],
-    ['H03', 'MED002', 'LOT-302', 190, 900, 'ELIGIBLE'],
-    ['H04', 'MED003', 'LOT-401', 180, 520, 'ELIGIBLE'],
-    ['H04', 'MED004', 'LOT-402', 300, 320, 'ELIGIBLE'],
-    ['H05', 'MED001', 'LOT-501', 7, 240, 'ELIGIBLE'],
-    ['H05', 'MED002', 'LOT-502', 160, 0, 'QUARANTINED'],
-    ['H06', 'MED003', 'LOT-601', 220, 650, 'ELIGIBLE'],
-    ['H06', 'MED004', 'LOT-602', 200, 170, 'ELIGIBLE'],
-    ['H07', 'MED001', 'LOT-701', 270, 340, 'ELIGIBLE'],
-    ['H07', 'MED002', 'LOT-702', 5, 90, 'ELIGIBLE'],
-    ['H08', 'MED003', 'LOT-801', 140, 400, 'ELIGIBLE'],
-    ['H08', 'MED004', 'LOT-802', 240, 260, 'ELIGIBLE'],
-    ['H09', 'MED001', 'LOT-901', 365, 820, 'ELIGIBLE'],
-    ['H09', 'MED002', 'LOT-902', 180, 220, 'RECALLED'],
-    ['H10', 'MED003', 'LOT-1001', 210, 760, 'ELIGIBLE'],
-    ['H10', 'MED004', 'LOT-1002', 150, 190, 'DAMAGED'],
-  ] as const;
-
-  const now = new Date().toISOString();
-
-  return seed.map(
-    ([facility, medicineCode, lot, expiryDays, quantity, quality], index) => {
-      const medicine = medicines.find(
-        (item) => item.medicine_code === medicineCode,
-      )!;
-
-      return {
-        batch_code: `BATCH-${String(index + 1).padStart(3, '0')}`,
-        lot_number: lot,
-        facility_code: facility,
-        medicine_code: medicine.medicine_code,
-        generic_name: medicine.generic_name,
-        strength: medicine.strength,
-        expiry_date: dateFromToday(expiryDays),
-        quantity_on_hand_units: quantity,
-        quality_status: quality as InventoryQuality,
-        updated_at: now,
-      };
-    },
-  );
-}
-
-function loadBatches(): DemoBatch[] {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-
-    if (saved) {
-      const parsed: unknown = JSON.parse(saved);
-
-      if (Array.isArray(parsed)) {
-        return parsed as DemoBatch[];
-      }
-    }
-  } catch {
-    // Use the initial demo dataset if browser storage is unavailable.
-  }
-
-  return createInitialBatches();
-}
-
-function saveBatches(batches: DemoBatch[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(batches));
-}
 
 function daysUntilExpiry(value: string): number {
   const today = new Date();
@@ -165,10 +51,34 @@ function formatNumber(value: number): string {
 
 export default function InventoryPage() {
   const user = useAppSelector((state) => state.auth.user);
+  const inventory = useInventory();
+  const {
+    batches,
+    medicines,
+    mutationStatus,
+    loadInventory,
+    loadMedicines,
+    saveBatch,
+    updateBatch,
+  } = inventory;
   const isCoordinator = user?.role === 'NETWORK_COORDINATOR';
   const facilityCode = user?.facility_code ?? '';
 
-  const [batches, setBatches] = useState<DemoBatch[]>(loadBatches);
+  const facilities = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          batches.map((batch) => [
+            batch.facility_code,
+            {
+              facility_code: batch.facility_code,
+              name: batch.facility_name ?? batch.facility_code,
+            },
+          ]),
+        ).values(),
+      ),
+    [batches],
+  );
   const [search, setSearch] = useState('');
   const [facilityFilter, setFacilityFilter] = useState('ALL');
   const [qualityFilter, setQualityFilter] = useState('ALL');
@@ -179,17 +89,12 @@ export default function InventoryPage() {
   const [noticeType, setNoticeType] = useState<'success' | 'error'>(
     'success',
   );
-  const [saving, setSaving] = useState(false);
+  const saving = mutationStatus === 'loading';
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        saveBatches(batches);
-      }
-    } catch {
-      // The current session can still use in-memory data.
-    }
-  }, [batches]);
+    void loadInventory(isCoordinator ? undefined : facilityCode);
+    void loadMedicines();
+  }, [loadInventory, loadMedicines, isCoordinator, facilityCode]);
 
   const visibleBatches = useMemo(() => {
     if (isCoordinator) return batches;
@@ -319,68 +224,14 @@ export default function InventoryPage() {
     quantity_on_hand_units: number;
     quality_status: InventoryQuality;
   }) {
-    setSaving(true);
-
     try {
       if (!facilityCode) {
         throw new Error('Your account has no assigned facility.');
       }
-
-      const lot = payload.lot_number.trim();
-
-      if (!lot) {
-        throw new Error('Lot number is required.');
-      }
-
-      if (
-        batches.some(
-          (batch) =>
-            batch.facility_code === facilityCode &&
-            batch.lot_number.toLowerCase() === lot.toLowerCase(),
-        )
-      ) {
-        throw new Error(
-          'This lot number already exists at your facility.',
-        );
-      }
-
-      const medicine = medicines.find(
-        (item) => item.medicine_code === payload.medicine_code,
-      );
-
-      if (!medicine) {
-        throw new Error('Please choose a valid medicine.');
-      }
-
-      const nextNumber =
-        batches.reduce((max, batch) => {
-          const match = batch.batch_code.match(/^BATCH-(\d+)$/);
-
-          return match
-            ? Math.max(max, Number(match[1]))
-            : max;
-        }, 0) + 1;
-
-      const updated: DemoBatch[] = [
-        {
-          batch_code: `BATCH-${String(nextNumber).padStart(3, '0')}`,
-          lot_number: lot,
-          facility_code: facilityCode,
-          medicine_code: medicine.medicine_code,
-          generic_name: medicine.generic_name,
-          strength: medicine.strength,
-          expiry_date: payload.expiry_date,
-          quantity_on_hand_units: payload.quantity_on_hand_units,
-          quality_status: payload.quality_status,
-          updated_at: new Date().toISOString(),
-        },
-        ...batches,
-      ];
-
-      saveBatches(updated);
-      setBatches(updated);
+      await saveBatch(payload);
+      await loadInventory(facilityCode);
       closeForm();
-      announce('Batch added to local demo inventory.');
+      announce('Inventory batch saved.');
     } catch (error) {
       announce(
         error instanceof Error
@@ -388,8 +239,6 @@ export default function InventoryPage() {
           : 'Could not save the batch.',
         'error',
       );
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -401,8 +250,6 @@ export default function InventoryPage() {
       quality_status: InventoryQuality;
     },
   ) {
-    setSaving(true);
-
     try {
       const ownedBatch = batches.find(
         (batch) =>
@@ -416,47 +263,15 @@ export default function InventoryPage() {
         );
       }
 
-      const updated = batches.map((batch) =>
-        batch.batch_code === batchCode
-          ? { ...batch, ...patch, updated_at: new Date().toISOString() }
-          : batch,
-      );
-
-      saveBatches(updated);
-      setBatches(updated);
+      await updateBatch(batchCode, patch);
+      await loadInventory(facilityCode);
       closeForm();
-      announce('Batch updated in local demo inventory.');
+      announce('Inventory batch updated.');
     } catch (error) {
       announce(
         error instanceof Error
           ? error.message
           : 'Could not update the batch.',
-        'error',
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function resetDemoInventory() {
-    const confirmed = window.confirm(
-      'Reset demo inventory to the original sample data? Local changes will be lost.',
-    );
-
-    if (!confirmed) return;
-
-    const initial = createInitialBatches();
-
-    try {
-      saveBatches(initial);
-      setBatches(initial);
-      resetFilters();
-      announce('Demo inventory reset to the original sample data.');
-    } catch {
-      setBatches(initial);
-      resetFilters();
-      announce(
-        'Demo data reset for this session, but browser storage is unavailable.',
         'error',
       );
     }
@@ -485,7 +300,7 @@ export default function InventoryPage() {
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-2 border-b border-dashed border-[#ded7c8] px-1 py-2 text-xs text-[#71827d]">
             <span className="h-2 w-2 rounded-full bg-amber-500" />
-            Local demo data
+            Live inventory
           </span>
 
           {!isCoordinator && (
@@ -502,10 +317,10 @@ export default function InventoryPage() {
           <button
             type="button"
             className="inline-flex items-center justify-center gap-2 px-3 py-3 text-sm text-[#71827d] hover:text-[#193632] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2"
-            onClick={resetDemoInventory}
+            onClick={() => void loadInventory(isCoordinator ? undefined : facilityCode)}
           >
             <RefreshCw size={15} />
-            Reset demo
+            Refresh
           </button>
         </div>
       </section>
@@ -800,14 +615,14 @@ export default function InventoryPage() {
               : `Facility scope: ${facilityCode || 'Unassigned'}`}
           </span>
 
-          <span>Fictional demo data · Local browser storage</span>
+          <span>Live data from MedMove API</span>
         </div>
       </section>
 
       <p className="flex items-start gap-2 text-xs leading-5 text-[#71827d]">
         <RefreshCw size={13} className="mt-0.5 shrink-0" />
-        Changes are stored in this browser only. No real inventory is changed,
-        and no optimization trigger or transfer is executed.
+        Inventory changes are persisted by the backend and may trigger
+        synchronous optimization.
       </p>
 
       {/* Add/edit batch modal */}

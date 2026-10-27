@@ -434,6 +434,7 @@ The latest recorded optimizer verification reported **33 passing optimizer-speci
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
+
 The complete test suite may also include database integration tests and may require PostgreSQL or additional environment configuration.
 
 ### Integration verification checklist

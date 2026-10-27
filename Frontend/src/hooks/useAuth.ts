@@ -6,39 +6,20 @@ import { useAppSelector } from './useAppSelector';
 
 import {
   clearAuthError,
-  demoLogin,
   loginThunk,
-  logout,
+  logoutThunk,
   restoreSessionThunk,
-  signupThunk,
-  signupOptionsThunk,
 } from '../store/authSlice';
 
-import type { UserRole } from '../types/contracts';
+import type { LoginPayload } from '../types/contracts';
 
 export function useAuth() {
   const dispatch = useAppDispatch();
   const auth = useAppSelector((state) => state.auth);
 
   const login = useCallback(
-    (payload: Parameters<typeof loginThunk>[0]) =>
+    (payload: LoginPayload) =>
       dispatch(loginThunk(payload)).unwrap(),
-    [dispatch],
-  );
-
-  const signup = useCallback(
-    (payload: Parameters<typeof signupThunk>[0]) =>
-      dispatch(signupThunk(payload)).unwrap(),
-    [dispatch],
-  );
-
-  const loginDemo = useCallback(
-    (role: UserRole) => dispatch(demoLogin(role)).unwrap(),
-    [dispatch],
-  );
-
-  const loadSignupOptions = useCallback(
-    () => dispatch(signupOptionsThunk()),
     [dispatch],
   );
 
@@ -48,7 +29,7 @@ export function useAuth() {
   );
 
   const logoutUser = useCallback(
-    () => dispatch(logout()),
+    () => dispatch(logoutThunk()),
     [dispatch],
   );
 
@@ -59,12 +40,7 @@ export function useAuth() {
 
   return {
     ...auth,
-    signupFacilities: auth.signupFacilities ?? [],
-    signupOptionsStatus: auth.signupOptionsStatus ?? 'idle',
     login,
-    signup,
-    loginDemo,
-    loadSignupOptions,
     restoreSession,
     logout: logoutUser,
     clearError,

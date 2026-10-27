@@ -1,0 +1,5 @@
+id,medicine_code,generic_name,strength,dosage_form,base_unit,is_active
+7c029f0e-0a92-4dd9-be43-0a00e8cb9bdc,MED1,Paracetamol,500mg,Tablet,tab,True
+5319ff52-6327-454a-a578-ba26904f1da7,MED2,Amoxicillin,250mg,Capsule,cap,True
+2a13e1b6-7335-437e-bd6e-818bdcbd8428,MED3,Salbutamol,100mcg,Inhaler,puff,True
+9447647a-9cba-46e6-a062-b216349870f6,MED4,ORS,21g,Sachet,sachet,True

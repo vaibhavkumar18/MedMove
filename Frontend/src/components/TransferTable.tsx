@@ -2,11 +2,12 @@
 import {
   ArrowDownLeft,
   ArrowUpRight,
+  ArrowRight,
   Clock3,
-  MapPin,
   Package,
   Route,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Transfer, UserRole } from '../types/contracts';
 import { paiseToRupees } from '../utils/money';
 
@@ -33,9 +34,11 @@ function getStatusStyles(status: string): string {
 export default function TransferTable({
   transfers,
   role,
+  runId,
 }: {
   transfers: Transfer[];
   role: UserRole;
+  runId?: string;
 }) {
   const isCoordinator = role === 'NETWORK_COORDINATOR';
 
@@ -83,6 +86,9 @@ export default function TransferTable({
             <th className="whitespace-nowrap px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
               Status
             </th>
+            <th className="whitespace-nowrap px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              {/* View details */}
+            </th>
           </tr>
         </thead>
 
@@ -90,6 +96,15 @@ export default function TransferTable({
           {transfers.map((transfer, index) => {
             const direction = transfer.direction;
             const isIncoming = direction === 'INCOMING';
+
+            const srcLabel = transfer.source_facility_name ?? transfer.source_facility_code;
+            const dstLabel = transfer.destination_facility_name ?? transfer.destination_facility_code;
+            const medLabel = transfer.medicine_name ?? transfer.medicine_code;
+
+            const detailPath =
+              runId !== undefined
+                ? `/recommendations/${runId}/${index}`
+                : `/recommendations/latest/${index}`;
 
             return (
               <tr
@@ -116,33 +131,44 @@ export default function TransferTable({
                 )}
 
                 <td className="px-5 py-4">
-                  <div className="flex min-w-[170px] items-start gap-2.5">
+                  <div className="flex min-w-[200px] items-start gap-2.5">
                     <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-700 ring-1 ring-teal-100">
                       <Route size={15} />
                     </span>
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold text-slate-700">
-                        <span>{transfer.source_facility_code}</span>
-                        <span className="text-slate-400">→</span>
-                        <span>{transfer.destination_facility_code}</span>
+                      {/* Primary: human-readable facility names */}
+                      <div className="text-xs font-semibold leading-snug text-slate-800">
+                        {srcLabel}
                       </div>
-                      <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400">
-                        <MapPin size={11} />
-                        Source to destination
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                        <ArrowRight size={10} />
+                        {dstLabel}
+                      </div>
+                      {/* Secondary: facility codes */}
+                      <div className="mt-1 font-mono text-[10px] text-slate-400">
+                        {transfer.source_facility_code} → {transfer.destination_facility_code}
                       </div>
                     </div>
                   </div>
                 </td>
 
                 <td className="px-5 py-4">
-                  <div className="flex min-w-[135px] items-start gap-2">
+                  <div className="flex min-w-[160px] items-start gap-2">
                     <Package size={15} className="mt-0.5 shrink-0 text-slate-400" />
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-700">
-                        {transfer.medicine_code}
+                      {/* Primary: readable medicine name */}
+                      <p className="text-xs font-semibold leading-snug text-slate-800">
+                        {medLabel}
                       </p>
-                      <p className="mt-1 break-all text-[10px] leading-4 text-slate-400">
-                        {transfer.source_batch_code}
+                      {/* Secondary: medicine code (only if name resolved) */}
+                      {transfer.medicine_name && (
+                        <p className="font-mono text-[10px] text-slate-400">
+                          {transfer.medicine_code}
+                        </p>
+                      )}
+                      {/* Batch code */}
+                      <p className="mt-0.5 break-all font-mono text-[10px] leading-4 text-slate-400">
+                        Batch: {transfer.source_batch_code}
                       </p>
                     </div>
                   </div>
@@ -176,6 +202,16 @@ export default function TransferTable({
                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
                     {transfer.status.replaceAll('_', ' ')}
                   </span>
+                </td>
+
+                <td className="px-5 py-4">
+                  <Link
+                    to={detailPath}
+                    className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-[#ded6c7] bg-[#f7f5f0] px-2.5 py-1.5 text-[10px] font-medium text-[#4a5e59] transition-colors hover:bg-[#e8e2d6] hover:text-[#193632] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d]"
+                  >
+                    View details
+                    <ArrowRight size={10} />
+                  </Link>
                 </td>
               </tr>
             );

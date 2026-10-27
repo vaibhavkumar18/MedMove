@@ -1,0 +1,11 @@
+id,facility_code,name,facility_type,district,state,is_active
+695bda4b-7eb8-4df6-a0a5-a78fb5e08ee0,H01,District Hospital Central,CENTRAL,District A,State X,True
+87344a0b-9ce1-4fd6-912c-e39b175e1006,H02,District Hospital East,EAST,District B,State X,True
+0498b801-b2b7-4793-8e28-235667754761,H03,District Hospital West,WEST,District C,State X,True
+2e342099-34fa-487a-9c93-98516e25df83,H04,District Hospital North,NORTH,District D,State Y,True
+c05a0efb-eaa7-458b-a7cf-281b172935d1,H05,District Hospital South,SOUTH,District E,State Y,True
+00c202a9-64f1-4138-bd93-292a4271288e,H06,Regional Medical Center 1,REGIONAL,District F,State Z,True
+9dc39d22-1373-431a-8774-ffc93c17c2e6,H07,Regional Medical Center 2,REGIONAL,District G,State Z,True
+068b9af1-1aa1-49c8-8e70-e13b62d7e6d7,H08,Community Health Center 1,COMMUNITY,District H,State X,True
+dcf9d2d3-2076-44e5-b806-fa5b926f72fc,H09,Community Health Center 2,COMMUNITY,District I,State Y,True
+6f5de1c0-2199-463c-a2bc-6a6726ffb680,H10,Community Health Center 3,COMMUNITY,District J,State Z,True

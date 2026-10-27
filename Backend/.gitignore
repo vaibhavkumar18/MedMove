@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+.pytest_cache/
+*.db
+.venv
+BACKEND_ENGINEER_GUIDE_FINAL.md

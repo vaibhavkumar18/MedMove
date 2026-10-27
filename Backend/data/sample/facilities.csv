@@ -1,0 +1,11 @@
+facility_code,name,facility_type,district,state,is_active
+H01,City General Hospital,DISTRICT,Pune,Maharashtra,true
+H02,Riverside District Hospital,DISTRICT,Nashik,Maharashtra,true
+H03,Hillside Community Clinic,COMMUNITY,Aurangabad,Maharashtra,true
+H04,Northgate Regional Hospital,REGIONAL,Nagpur,Maharashtra,true
+H05,Southport District Hospital,DISTRICT,Solapur,Maharashtra,true
+H06,Westbrook Medical Centre,REGIONAL,Kolhapur,Maharashtra,true
+H07,Eastview Health Centre,COMMUNITY,Pune,Maharashtra,true
+H08,Lakeside General Hospital,DISTRICT,Nashik,Maharashtra,true
+H09,Valley View Community Clinic,COMMUNITY,Aurangabad,Maharashtra,true
+H10,Summit Care Hospital,DISTRICT,Nagpur,Maharashtra,true

@@ -18,26 +18,9 @@ export interface UserProfile {
 }
 
 export interface AuthResponse {
-  access_token: string;
-  token_type: 'bearer' | string;
+  access_token?: string | null;
+  token_type?: 'bearer' | string;
   user: UserProfile;
-}
-
-export interface SignupOptionsResponse {
-  facilities: Array<{
-    facility_code: string;
-    name: string;
-    district: string;
-    state: string;
-  }>;
-}
-
-export interface SignupPayload {
-  full_name: string;
-  email: string;
-  password: string;
-  facility_code: string;
-  join_code: string;
 }
 
 export interface LoginPayload {
@@ -99,6 +82,7 @@ export interface InventoryBatch {
   facility_name?: string;
   medicine_code: string;
   generic_name: string;
+  strength?: string;
   lot_number: string;
   expiry_date: string;
   quantity_on_hand_units: number;
@@ -139,8 +123,11 @@ export interface InventoryMutationResponse {
 
 export interface Transfer {
   source_facility_code: string;
+  source_facility_name?: string;
   destination_facility_code: string;
+  destination_facility_name?: string;
   medicine_code: string;
+  medicine_name?: string;
   source_batch_code: string;
   recommended_quantity_units: number;
   estimated_cost_minor_units: number;
@@ -178,10 +165,12 @@ export interface LatestRunResponse {
   facility_code: string | null;
   summary: {
     transfer_count: number;
-    recommended_units: number;
-    estimated_cost_minor_units: number;
-    unmet_shortage_count: number;
-    unmet_shortage_units: number;
+    total_recommended_units: number;
+    total_cost_minor_units: number;
+    initial_shortage_line_count: number;
+    unmet_shortage_line_count: number;
+    total_unmet_shortage_units: number;
+    priority_weighted_units_score: number;
   };
   transfers: Transfer[];
   unmet_shortages: UnmetShortage[];

@@ -1,9 +1,9 @@
-
 import { CalendarDays, ClipboardList, Boxes, Play, RefreshCw } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 
 import { useOptimization } from '../hooks/useOptimization';
+import { useDashboard } from '../hooks/useDashboard';
 import { useAppSelector } from '../hooks/useAppSelector';
 
 import LoadingState from '../components/LoadingState';
@@ -11,91 +11,6 @@ import EmptyState from '../components/EmptyState';
 
 import { formatDate } from '../utils/dates';
 import { rupeesToPaise } from '../utils/money';
-import type { DashboardFacility } from '../types/contracts';
-
-// Illustrative frontend data, not live hospital inventory.
-const DEMO_FACILITIES: DashboardFacility[] = [
-  {
-    facility_code: 'H01',
-    facility_name: 'City General Hospital',
-    shortage_line_count: 3,
-    total_shortage_units: 180,
-    eligible_surplus_line_count: 4,
-    eligible_surplus_units: 420,
-  },
-  {
-    facility_code: 'H02',
-    facility_name: 'District Medical Centre',
-    shortage_line_count: 2,
-    total_shortage_units: 100,
-    eligible_surplus_line_count: 3,
-    eligible_surplus_units: 250,
-  },
-  {
-    facility_code: 'H03',
-    facility_name: 'Community Health Centre',
-    shortage_line_count: 1,
-    total_shortage_units: 45,
-    eligible_surplus_line_count: 5,
-    eligible_surplus_units: 560,
-  },
-  {
-    facility_code: 'H04',
-    facility_name: 'Regional Care Hospital',
-    shortage_line_count: 2,
-    total_shortage_units: 125,
-    eligible_surplus_line_count: 2,
-    eligible_surplus_units: 190,
-  },
-  {
-    facility_code: 'H05',
-    facility_name: 'Northside Medical Centre',
-    shortage_line_count: 0,
-    total_shortage_units: 0,
-    eligible_surplus_line_count: 3,
-    eligible_surplus_units: 310,
-  },
-  {
-    facility_code: 'H06',
-    facility_name: 'Community Hospital',
-    shortage_line_count: 1,
-    total_shortage_units: 60,
-    eligible_surplus_line_count: 2,
-    eligible_surplus_units: 140,
-  },
-  {
-    facility_code: 'H07',
-    facility_name: 'Central Health Facility',
-    shortage_line_count: 0,
-    total_shortage_units: 0,
-    eligible_surplus_line_count: 4,
-    eligible_surplus_units: 380,
-  },
-  {
-    facility_code: 'H08',
-    facility_name: 'East District Hospital',
-    shortage_line_count: 2,
-    total_shortage_units: 90,
-    eligible_surplus_line_count: 1,
-    eligible_surplus_units: 75,
-  },
-  {
-    facility_code: 'H09',
-    facility_name: 'Riverside Health Centre',
-    shortage_line_count: 1,
-    total_shortage_units: 30,
-    eligible_surplus_line_count: 3,
-    eligible_surplus_units: 220,
-  },
-  {
-    facility_code: 'H10',
-    facility_name: 'Southside General Hospital',
-    shortage_line_count: 0,
-    total_shortage_units: 0,
-    eligible_surplus_line_count: 2,
-    eligible_surplus_units: 165,
-  },
-];
 
 function MetricCard({
   title,
@@ -120,6 +35,7 @@ function MetricCard({
 export default function NetworkDashboardPage() {
   const user = useAppSelector((state) => state.auth.user);
   const optimization = useOptimization();
+  const dashboard = useDashboard();
 
   const [planningDate, setPlanningDate] = useState(
     () => new Date().toISOString().slice(0, 10),
@@ -128,8 +44,11 @@ export default function NetworkDashboardPage() {
   const [runMessage, setRunMessage] = useState('');
 
   const loadNetworkData = useCallback(async () => {
-    await optimization.refreshLatestRun();
-  }, [optimization.refreshLatestRun]);
+    await Promise.allSettled([
+      dashboard.loadDashboard(),
+      optimization.refreshLatestRun(),
+    ]);
+  }, [dashboard.loadDashboard, optimization.refreshLatestRun]);
 
   useEffect(() => {
     if (user?.role === 'NETWORK_COORDINATOR') {
@@ -165,10 +84,25 @@ export default function NetworkDashboardPage() {
       });
 
       setRunMessage(
-        `Demo completed with ${result.summary.transfer_count} illustrative transfer line(s).`,
+        `Optimization completed with ${result.summary.transfer_count} transfer line(s).`,
       );
-    } catch {
-      setRunMessage('Unable to generate the demo result. Please try again.');
+      // Refresh dashboard counts now that a new run exists
+      void dashboard.loadDashboard();
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'DUPLICATE_RUN'
+      ) {
+        setRunMessage(
+          'This inventory snapshot has already been optimized. View the saved recommendations to review the existing transfer plan.',
+        );
+        // Load the existing saved result so it remains visible.
+        void optimization.refreshLatestRun();
+      } else {
+        setRunMessage('Unable to generate an optimization result. Please try again.');
+      }
     }
   };
 
@@ -180,43 +114,21 @@ export default function NetworkDashboardPage() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const facilities = DEMO_FACILITIES;
-  const facilityCount = facilities.length;
-
-  const shortageLineCount = facilities.reduce(
-    (sum, facility) => sum + facility.shortage_line_count,
-    0,
-  );
-
-  const totalShortageUnits = facilities.reduce(
-    (sum, facility) => sum + facility.total_shortage_units,
-    0,
-  );
-
-  const eligibleSurplusUnits = facilities.reduce(
-    (sum, facility) => sum + facility.eligible_surplus_units,
-    0,
-  );
-
-  const eligibleSurplusLines = facilities.reduce(
-    (sum, facility) => sum + facility.eligible_surplus_line_count,
-    0,
-  );
-
   const latest = optimization.latest;
+  const summary = dashboard.data?.summary;
+  const facilities = dashboard.data?.facilities ?? [];
+
+  // Use live dashboard data for metrics; show '—' while loading
+  const facilityCount =
+    summary?.facility_count ?? facilities.length;
+  const shortageLineCount = summary?.shortage_line_count ?? '—';
+  const totalShortageUnits = summary?.total_shortage_units ?? 0;
+  const eligibleSurplusUnits = summary?.eligible_surplus_units ?? '—';
+  const eligibleSurplusLines = summary?.eligible_surplus_line_count ?? 0;
 
   return (
     <main className="min-h-screen bg-[#f3efe6] px-5 pb-12 pt-5 font-sans text-[#193632] sm:px-8 lg:px-10">
       <div className="mx-auto max-w-[1280px]">
-        {/* A restrained notice, matching the dashboard's dotted divider. */}
-        <div className="flex items-start gap-2.5 border-b border-dashed border-[#ded6c7] pb-3 text-xs leading-5 text-[#7a8982] sm:text-[13px]">
-          <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#d89a18]" />
-          <p>
-            Preview workspace. Facility figures are illustrative sample data;
-            optimization results are not verified hospital recommendations.
-          </p>
-        </div>
-
         {/* Page introduction */}
         <section className="flex flex-col justify-between gap-5 py-7 sm:flex-row sm:items-end sm:py-8">
           <div>
@@ -235,13 +147,16 @@ export default function NetworkDashboardPage() {
             <button
               type="button"
               onClick={() => void loadNetworkData()}
-              disabled={optimization.latestStatus === 'loading'}
+              disabled={
+                dashboard.status === 'loading' ||
+                optimization.latestStatus === 'loading'
+              }
               className="inline-flex items-center gap-2 rounded-md px-2 py-2 text-sm text-[#7a8982] transition-colors hover:text-[#193632] disabled:opacity-50"
             >
               <RefreshCw
                 size={15}
                 className={
-                  optimization.latestStatus === 'loading' ? 'animate-spin' : ''
+                  dashboard.status === 'loading' ? 'animate-spin' : ''
                 }
               />
               Refresh
@@ -249,7 +164,7 @@ export default function NetworkDashboardPage() {
           </div>
         </section>
 
-        {/* Reliable page-level navigation for coordinator workspaces. */}
+        {/* Navigation */}
         <nav
           aria-label="Network workspace navigation"
           className="mb-7 flex flex-wrap items-center gap-2 border-y border-[#ded6c7] py-3"
@@ -278,30 +193,38 @@ export default function NetworkDashboardPage() {
           </Link>
         </nav>
 
-        {/* Editorial metric strip: dividers rather than separate cards. */}
+        {/* Top metric strip */}
         <section className="grid grid-cols-1 border-y border-[#ded6c7] sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             title="Facilities"
             value={facilityCount}
-            detail="Facilities included in the sample network"
+            detail="Active facilities in the network"
           />
           <MetricCard
             title="Shortage lines"
             value={shortageLineCount}
-            detail={`${totalShortageUnits.toLocaleString('en-IN')} sample units below target`}
+            detail={
+              typeof totalShortageUnits === 'number' && totalShortageUnits > 0
+                ? `${totalShortageUnits.toLocaleString('en-IN')} units below target`
+                : 'No active shortages detected'
+            }
           />
           <MetricCard
             title="Eligible surplus"
-            value={eligibleSurplusUnits.toLocaleString('en-IN')}
-            detail={`${eligibleSurplusLines} potential surplus lines in sample data`}
+            value={
+              typeof eligibleSurplusUnits === 'number'
+                ? eligibleSurplusUnits.toLocaleString('en-IN')
+                : eligibleSurplusUnits
+            }
+            detail={`${eligibleSurplusLines} potential surplus lines`}
           />
           <MetricCard
             title="Latest run"
             value={latest?.run ? 'Run available' : 'No run yet'}
             detail={
               latest?.run
-                ? `${latest.summary.transfer_count} illustrative transfer lines`
-                : 'Run an optimization preview to see sample results'
+                ? `${latest.summary.transfer_count} transfer lines`
+                : 'Run an optimization to see saved results'
             }
           />
         </section>
@@ -315,82 +238,92 @@ export default function NetworkDashboardPage() {
                   Network facilities
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-[#7a8982]">
-                  Sample shortage and surplus figures by facility.
+                  Shortage and surplus figures by facility.
                 </p>
               </div>
               <span className="font-mono text-xs text-[#7a8982]">
-                {facilityCount.toString().padStart(2, '0')} FACILITIES
+                {String(facilityCount).padStart(2, '0')} FACILITIES
               </span>
             </div>
 
-            <div className="mt-5 overflow-x-auto">
-              <table className="w-full min-w-[590px] border-collapse text-left text-sm">
-                <thead>
-                  <tr className="border-y border-[#ded6c7] text-xs text-[#7a8982]">
-                    <th className="py-3 pr-4 font-medium">Facility</th>
-                    <th className="px-3 py-3 font-medium">Shortage</th>
-                    <th className="px-3 py-3 font-medium">Surplus</th>
-                    <th className="py-3 pl-3 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {facilities.map((facility) => (
-                    <tr
-                      key={facility.facility_code}
-                      className="border-b border-[#e2dacb] align-top"
-                    >
-                      <td className="py-4 pr-4">
-                        <p className="font-medium text-[#193632]">
-                          {facility.facility_name}
-                        </p>
-                        <p className="mt-1 font-mono text-[11px] text-[#7a8982]">
-                          {facility.facility_code}
-                        </p>
-                      </td>
-                      <td className="px-3 py-4">
-                        <p
-                          className={`font-sans text-lg tabular-nums ${
-                            facility.total_shortage_units > 0
-                              ? 'text-[#b94b3c]'
-                              : 'text-[#193632]'
-                          }`}
-                        >
-                          {facility.total_shortage_units.toLocaleString('en-IN')}
-                        </p>
-                        <p className="mt-1 text-xs text-[#7a8982]">
-                          {facility.shortage_line_count} lines
-                        </p>
-                      </td>
-                      <td className="px-3 py-4">
-                        <p className="font-sans text-lg tabular-nums text-[#193632]">
-                          {facility.eligible_surplus_units.toLocaleString('en-IN')}
-                        </p>
-                        <p className="mt-1 text-xs text-[#7a8982]">
-                          {facility.eligible_surplus_line_count} lines
-                        </p>
-                      </td>
-                      <td className="py-4 pl-3">
-                        <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs text-[#7a8982]">
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              facility.shortage_line_count > 0
-                                ? 'bg-[#d89a18]'
-                                : 'bg-[#1f625d]'
-                            }`}
-                          />
-                          {facility.shortage_line_count > 0
-                            ? 'Needs attention'
-                            : 'On target'}
-                        </span>
-                      </td>
+            {dashboard.status === 'loading' && facilities.length === 0 ? (
+              <div className="mt-5">
+                <LoadingState label="Loading facility data…" />
+              </div>
+            ) : facilities.length === 0 ? (
+              <div className="mt-5">
+                <EmptyState
+                  title="No facility data available"
+                  description="Dashboard data could not be loaded from the backend."
+                />
+              </div>
+            ) : (
+              <div className="mt-5 overflow-x-auto">
+                <table className="w-full min-w-[590px] border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="border-y border-[#ded6c7] text-xs text-[#7a8982]">
+                      <th className="py-3 pr-4 font-medium">Facility</th>
+                      <th className="px-3 py-3 font-medium">Shortage</th>
+                      <th className="px-3 py-3 font-medium">Surplus</th>
+                      <th className="py-3 pl-3 font-medium">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-3 text-xs italic leading-5 text-[#7a8982]">
-              Facility values are sample figures for preview only.
-            </p>
+                  </thead>
+                  <tbody>
+                    {facilities.map((facility) => (
+                      <tr
+                        key={facility.facility_code}
+                        className="border-b border-[#e2dacb] align-top"
+                      >
+                        <td className="py-4 pr-4">
+                          <p className="font-medium text-[#193632]">
+                            {facility.facility_name}
+                          </p>
+                          <p className="mt-1 font-mono text-[11px] text-[#7a8982]">
+                            {facility.facility_code}
+                          </p>
+                        </td>
+                        <td className="px-3 py-4">
+                          <p
+                            className={`font-sans text-lg tabular-nums ${
+                              facility.total_shortage_units > 0
+                                ? 'text-[#b94b3c]'
+                                : 'text-[#193632]'
+                            }`}
+                          >
+                            {facility.total_shortage_units.toLocaleString('en-IN')}
+                          </p>
+                          <p className="mt-1 text-xs text-[#7a8982]">
+                            {facility.shortage_line_count} lines
+                          </p>
+                        </td>
+                        <td className="px-3 py-4">
+                          <p className="font-sans text-lg tabular-nums text-[#193632]">
+                            {facility.eligible_surplus_units.toLocaleString('en-IN')}
+                          </p>
+                          <p className="mt-1 text-xs text-[#7a8982]">
+                            {facility.eligible_surplus_line_count} lines
+                          </p>
+                        </td>
+                        <td className="py-4 pl-3">
+                          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs text-[#7a8982]">
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                facility.shortage_line_count > 0
+                                  ? 'bg-[#d89a18]'
+                                  : 'bg-[#1f625d]'
+                              }`}
+                            />
+                            {facility.shortage_line_count > 0
+                              ? 'Needs attention'
+                              : 'On target'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* Planning panel */}
@@ -400,10 +333,10 @@ export default function NetworkDashboardPage() {
                 PLANNING
               </p>
               <h2 className="mt-2 font-sans text-[25px] leading-tight tracking-tight text-[#193632]">
-                Run demo optimization
+                Run optimization
               </h2>
               <p className="mt-2 text-sm leading-6 text-[#7a8982]">
-                Set a planning date and a transfer budget to preview a possible
+                Set a planning date and a transfer budget to generate a
                 network plan.
               </p>
             </div>
@@ -456,8 +389,7 @@ export default function NetworkDashboardPage() {
                   />
                 </div>
                 <p className="mt-1.5 text-xs leading-5 text-[#7a8982]">
-                  The preview uses sample transfer lines and the selected
-                  budget.
+                  Enter in rupees. Rs 500 → 50,000 paise sent to the API.
                 </p>
               </div>
 
@@ -472,11 +404,7 @@ export default function NetworkDashboardPage() {
 
               {runMessage && (
                 <div
-                  className={`border px-3.5 py-3 text-sm leading-5 ${
-                    runMessage.startsWith('Demo completed')
-                      ? 'border-[#cfe0d8] bg-[#f0f7f3] text-[#315d4c]'
-                      : 'border-[#e5d4ad] bg-[#fff8e8] text-[#825c14]'
-                  }`}
+                  className="border border-[#cfe0d8] bg-[#f0f7f3] px-3.5 py-3 text-sm leading-5 text-[#315d4c]"
                   role="status"
                   aria-live="polite"
                 >
@@ -492,18 +420,18 @@ export default function NetworkDashboardPage() {
                 {optimization.manualRunStatus === 'loading' ? (
                   <>
                     <RefreshCw size={15} className="animate-spin" />
-                    Preparing preview…
+                    Running optimization…
                   </>
                 ) : (
                   <>
                     <Play size={15} />
-                    Run demo optimization
+                    Run optimization
                   </>
                 )}
               </button>
             </form>
             <p className="mt-4 border-t border-dashed border-[#ded6c7] pt-4 text-xs leading-5 text-[#7a8982]">
-              Demo only. No real stock is moved by this action.
+              Recommendations are proposals. No stock is moved by this action.
             </p>
           </section>
         </section>
@@ -513,13 +441,13 @@ export default function NetworkDashboardPage() {
           <div className="flex flex-col justify-between gap-3 border-b border-[#ded6c7] pb-4 sm:flex-row sm:items-end">
             <div>
               <p className="font-mono text-[11px] tracking-wide text-[#7a8982]">
-                OPTIMIZATION PREVIEW
+                OPTIMIZATION RESULT
               </p>
               <h2 className="mt-2 font-sans text-[25px] leading-tight tracking-tight text-[#193632]">
-                Latest demo result
+                Latest result
               </h2>
               <p className="mt-2 text-sm leading-6 text-[#7a8982]">
-                Illustrative transfers and remaining shortages.
+                Persisted optimization run from the network optimizer.
               </p>
             </div>
             <Link
@@ -532,19 +460,14 @@ export default function NetworkDashboardPage() {
 
           <div className="py-5">
             {optimization.latestStatus === 'loading' && !latest ? (
-              <LoadingState label="Preparing demo result…" />
+              <LoadingState label="Loading latest result…" />
             ) : !latest?.run ? (
               <EmptyState
-                title="No demo result yet"
-                description="Choose a planning date and budget, then run the demo to preview a result."
+                title="No optimization run yet"
+                description="Choose a planning date and budget, then run the optimizer to generate a result."
               />
             ) : (
               <div>
-                <p className="mb-5 border-l-2 border-[#d89a18] bg-[#fff8e8] px-4 py-3 text-sm leading-6 text-[#825c14]">
-                  This result is illustrative. No production optimization
-                  solver was run.
-                </p>
-
                 <div className="grid grid-cols-1 border-y border-[#ded6c7] sm:grid-cols-2 xl:grid-cols-4">
                   <div className="border-b border-[#ded6c7] py-4 sm:px-4 xl:border-b-0 xl:border-r xl:first:pl-0">
                     <p className="text-xs text-[#7a8982]">Run status</p>
@@ -567,7 +490,7 @@ export default function NetworkDashboardPage() {
                   <div className="py-4 sm:px-4 xl:pr-0">
                     <p className="text-xs text-[#7a8982]">Unmet shortage</p>
                     <p className="mt-2 font-sans text-2xl tabular-nums text-[#b94b3c]">
-                      {latest.summary.unmet_shortage_units.toLocaleString('en-IN')}
+                      {latest.summary.total_unmet_shortage_units.toLocaleString('en-IN')}
                       <span className="ml-1 font-sans text-xs text-[#7a8982]">
                         units
                       </span>
@@ -585,7 +508,7 @@ export default function NetworkDashboardPage() {
                         Proposed transfers
                       </span>
                       <span className="mt-1 block text-sm text-[#7a8982]">
-                        Review sample transfer routes
+                        Review transfer routes
                       </span>
                     </span>
                     <span className="font-sans text-2xl tabular-nums text-[#193632]">
@@ -602,11 +525,11 @@ export default function NetworkDashboardPage() {
                         Unmet shortage lines
                       </span>
                       <span className="mt-1 block text-sm text-[#7a8982]">
-                        Review outstanding sample demand
+                        Review outstanding demand
                       </span>
                     </span>
                     <span className="font-sans text-2xl tabular-nums text-[#b94b3c]">
-                      {latest.summary.unmet_shortage_count}
+                      {latest.summary.unmet_shortage_line_count}
                     </span>
                   </Link>
                 </div>
@@ -616,8 +539,7 @@ export default function NetworkDashboardPage() {
         </section>
 
         <footer className="mt-8 border-t border-dashed border-[#ded6c7] pt-4 text-xs leading-5 text-[#7a8982]">
-          Frontend demo. Facility figures are sample values; no real stock is
-          moved by this page.
+          Recommendations require human review. No stock is moved by viewing or generating optimization results.
         </footer>
       </div>
     </main>

@@ -1,31 +1,35 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 
 import ProtectedRoute from './ProtectedRoute';
 
 import LoginPage from '../pages/LoginPage';
-import SignupPage from '../pages/SignupPage';
+import HomePage from '../pages/HomePage';
 import HospitalDashboardPage from '../pages/HospitalDashboardPage';
 import NetworkDashboardPage from '../pages/NetworkDashboardPage';
 import InventoryPage from '../pages/InventoryPage';
 import RecommendationsPage from '../pages/RecommendationsPage';
+import TransferDetailPage from '../pages/TransferDetailPage';
 
 import AppLayout from '../components/AppLayout';
+import PublicLayout from '../components/PublicLayout';
 
 export const router = createBrowserRouter([
+  // ── Public routes (no authentication required) ──────────────────────────
   {
-    path: '/',
-    element: <Navigate to="/dashboard" replace />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/signup',
-    element: <SignupPage />,
+    element: <PublicLayout />,
+    children: [
+      {
+        path: '/',
+        element: <HomePage />,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+    ],
   },
 
-  // Shared routes: accessible to both authenticated roles.
+  // ── Authenticated: shared routes (both roles) ────────────────────────────
   {
     element: (
       <ProtectedRoute
@@ -44,12 +48,16 @@ export const router = createBrowserRouter([
             path: '/recommendations',
             element: <RecommendationsPage />,
           },
+          {
+            path: '/recommendations/:runId/:transferIndex',
+            element: <TransferDetailPage />,
+          },
         ],
       },
     ],
   },
 
-  // Hospital-only dashboard.
+  // ── Authenticated: hospital-only dashboard ───────────────────────────────
   {
     element: <ProtectedRoute roles={['HOSPITAL_USER']} />,
     children: [
@@ -65,7 +73,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Network coordinator-only dashboard.
+  // ── Authenticated: coordinator-only dashboard ────────────────────────────
   {
     element: <ProtectedRoute roles={['NETWORK_COORDINATOR']} />,
     children: [
@@ -81,8 +89,9 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // Unknown paths fall through to the homepage.
   {
     path: '*',
-    element: <Navigate to="/" replace />,
+    element: <HomePage />,
   },
 ]);

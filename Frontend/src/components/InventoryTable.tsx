@@ -20,7 +20,7 @@ export interface InventoryBatchRow {
   facility_code: string;
   medicine_code: string;
   generic_name: string;
-  strength: string;
+  strength?: string;
   expiry_date: string;
   quantity_on_hand_units: number;
   quality_status: InventoryQuality;
@@ -149,7 +149,7 @@ export default function InventoryTable({
                     <div>
                       <strong>{batch.generic_name}</strong>
                       <small>
-                        {batch.strength} · {batch.medicine_code}
+                        {batch.strength ? `${batch.strength} · ` : ''}{batch.medicine_code}
                       </small>
                       <small>
                         {batch.batch_code} · Lot {batch.lot_number}

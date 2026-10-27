@@ -42,7 +42,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative min-h-[calc(100vh-3.5rem)] w-full overflow-hidden bg-[#f3efe6] font-sans text-[#193632]">
+    <main className="relative min-h-screen w-full overflow-hidden bg-[#f3efe6] font-sans text-[#193632]">
       {/* Split-panel backgrounds */}
       <div className="absolute inset-0 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.88fr)]">
         <div className="hidden bg-[#1f625d] lg:block" />
@@ -65,7 +65,7 @@ export default function LoginPage() {
         style={{ clipPath: 'inset(0 0 0 50%)' }}
       />
 
-      <div className="relative z-10 grid h-full w-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.88fr)]">
+      <div className="relative z-10 grid min-h-screen w-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.88fr)]">
         {/* Left branding panel */}
         <section className="relative hidden min-h-0 flex-col justify-between overflow-hidden px-8 py-6 text-[#f8f5ed] lg:flex xl:px-12 xl:py-8">
           <div
@@ -131,7 +131,7 @@ export default function LoginPage() {
         </section>
 
         {/* Right login panel */}
-        <section className="relative flex h-full min-h-0 items-center justify-center px-5 py-4 sm:px-8 lg:px-10">
+        <section className="relative flex min-h-screen items-center justify-center px-5 py-8 sm:px-8 lg:px-10">
           <div className="relative z-10 w-full max-w-[520px]">
             {/* Mobile logo */}
             <div className="mb-6 flex items-center lg:hidden">

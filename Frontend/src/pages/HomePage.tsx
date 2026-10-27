@@ -132,7 +132,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#f1efe6] text-[#193632]">
       {/* HERO: LOOPING VIDEO BACKGROUND */}
-      <section className="relative isolate min-h-[700px] overflow-hidden bg-[#193632] sm:min-h-[760px] lg:min-h-[min(850px,100svh)]">
+      <section className="relative isolate min-h-[100svh] overflow-hidden bg-[#193632]">
         <video
           className="absolute inset-0 -z-30 h-full w-full object-cover"
           autoPlay
@@ -148,27 +148,24 @@ export default function HomePage() {
         <div className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-r from-[#081f1d]/75 via-[#102d29]/50 to-[#102d29]/30" />
         <div className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-b from-[#081f1d]/25 via-[#081f1d]/10 to-[#081f1d]/45" />
 
-        {/* Fade video into the beige page */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-28 bg-gradient-to-b from-transparent via-[#193632]/[0.06] to-[#f1efe6]" />
-
         {/* NAVBAR OVER VIDEO */}
-        <header className="absolute inset-x-0 top-0 z-30 border-b border-white/15 bg-[#102d29]/10">
+        <header className="absolute inset-x-0 top-0 z-30 bg-transparent">
           <nav className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-10">
             <Link
               to="/"
               aria-label="MedMove home"
-              className="group inline-flex items-center rounded-lg border-0 bg-white/[0.2] px-2 py-0.5 shadow-none backdrop-blur-sm transition duration-200 hover:bg-white/[0.22] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="group inline-flex items-center border-0 bg-transparent p-0 shadow-none transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <img
-                src="/logo.png"
+                src="/logoo.png"
                 alt="MedMove"
-                className="h-8 w-auto object-contain sm:h-9"
+                className="h-[35px] w-auto object-contain sm:h-[39px]"
               />
             </Link>
 
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition hover:border-white/40 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/35 bg-white/20 px-5 py-2.5 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition hover:border-white/50 hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               Sign in
               <ArrowUpRight size={16} />
@@ -177,7 +174,7 @@ export default function HomePage() {
         </header>
 
         {/* HERO CONTENT */}
-        <div className="mx-auto flex min-h-[700px] max-w-[1440px] items-center justify-center px-5 pb-12 pt-28 sm:min-h-[760px] sm:px-8 sm:pb-12 sm:pt-32 lg:min-h-[min(850px,100svh)] lg:px-10 lg:py-24">
+        <div className="mx-auto flex min-h-[100svh] max-w-[1440px] items-center justify-center px-5 pb-12 pt-28 sm:px-8 sm:pb-12 sm:pt-32 lg:px-10 lg:py-24">
           <div className="mx-auto flex w-full max-w-4xl flex-col items-center text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-[#102d29]/40 px-4 py-2.5 text-[11px] font-semibold tracking-[0.18em] text-[#e0eee6] backdrop-blur-md sm:text-xs">
               <ShieldCheck size={15} />
@@ -329,7 +326,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-[1080px] flex-col gap-5 px-5 py-7 sm:px-8 md:flex-row md:items-center md:justify-between">
           <Link to="/" aria-label="MedMove home" className="inline-flex w-fit items-center">
             <img
-              src="/logo.png"
+              src="/logoo.png"
               alt="MedMove"
               className="h-9 w-auto object-contain"
             />

@@ -11,3 +11,4 @@ python-multipart>=0.0.9,<1
 pytest>=8,<10
 httpx>=0.27,<1
 ortools>=9.12,<10
+email-validator==2.3.0

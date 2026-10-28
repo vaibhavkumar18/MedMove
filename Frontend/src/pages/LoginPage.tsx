@@ -1,24 +1,61 @@
-
-import {
-  LockKeyhole,
-  Mail,
-  Network,
-  ShieldCheck,
-  Building2,
-} from 'lucide-react';
+import { LockKeyhole, Mail, ShieldCheck, ArrowRight } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 
 import { useAuth } from '../hooks/useAuth';
 import type { LoginPayload, UserRole } from '../types/contracts';
+import './LoginPage.css';
 
 function getDestination(role: UserRole) {
   return role === 'NETWORK_COORDINATOR' ? '/network' : '/dashboard';
 }
 
+function Wordmark({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className={`mm-login-wordmark${compact ? ' is-compact' : ''}`} aria-label="MedMove">
+      <span>med</span><em>move</em>
+    </div>
+  );
+}
+
+function AccessScopeCard() {
+  return (
+    <div className="mm-login-scope-layout">
+      <article className="mm-login-scope-card" aria-label="What each role can see">
+        <p className="mm-login-scope-kicker">WHO SEES WHAT</p>
+        <div className="mm-login-scope-row">
+          <strong>Hospital user</strong>
+          <span>Their own facility</span>
+        </div>
+        <div className="mm-login-scope-row">
+          <strong>Network coordinator</strong>
+          <span>All ten hospitals</span>
+        </div>
+      </article>
+
+      <aside className="mm-login-scope-note">
+        <svg
+          className="mm-login-scope-arrow"
+          viewBox="0 0 74 45"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M70 5C51 3 33 9 20 24L5 28M5 28L20 13M5 28L21 31"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <p>you only see what you should</p>
+      </aside>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const { user, login, status, error, clearError } = useAuth();
-
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,143 +79,60 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-[#f3efe6] font-sans text-[#193632]">
-      {/* Split-panel backgrounds */}
-      <div className="absolute inset-0 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.88fr)]">
-        <div className="hidden bg-[#1f625d] lg:block" />
-        <div className="bg-[#f3efe6]" />
-      </div>
+    <main className="mm-login-page">
+      <div className="mm-login-layout">
+        {/* Editorial left panel — replaces the old green branding panel */}
+        <section className="mm-login-editorial" aria-labelledby="login-editorial-title">
+          <div className="mm-login-editorial-inner">
+            <header className="mm-login-editorial-header">
+              <Wordmark />
+            </header>
 
-      {/* Decorative circle shared across both panels */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-7rem] left-[calc(53.2%-12rem)] z-[1] hidden h-96 w-96 rounded-full border-2 border-white/10 lg:block"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-7rem] left-[calc(53.2%-12rem)] z-[1] hidden h-96 w-96 rounded-full bg-[#2d756b]/70 lg:block"
-        style={{ clipPath: 'inset(0 50% 0 0)' }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-7rem] left-[calc(53.2%-12rem)] z-[1] hidden h-96 w-96 rounded-full bg-[#dce5da]/85 lg:block"
-        style={{ clipPath: 'inset(0 0 0 50%)' }}
-      />
+            <div className="mm-login-editorial-content">
+              <p className="mm-login-eyebrow">MEDICINE, WHERE IT IS NEEDED</p>
+              <h2 id="login-editorial-title" className="mm-login-editorial-title">
+                Nothing in your
+                <br />
+                <em>network</em> left off.
+              </h2>
+              <p className="mm-login-editorial-description">
+                Sign in to see your facility&apos;s stock, the shortages across the network,
+                and any transfer proposals waiting for a person to review.
+              </p>
 
-      <div className="relative z-10 grid min-h-screen w-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(480px,0.88fr)]">
-        {/* Left branding panel */}
-        <section className="relative hidden min-h-0 flex-col justify-between overflow-hidden px-8 py-6 text-[#f8f5ed] lg:flex xl:px-12 xl:py-8">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-32 top-24 h-96 w-96 rounded-full border border-white/10"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-12 top-40 h-64 w-64 rounded-full border border-white/10"
-          />
-
-          <div className="relative z-10 inline-flex w-fit items-center gap-3 text-[#f8f5ed]">
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#f8f5ed] text-[#1f625d]">
-              <Network size={24} strokeWidth={2.4} />
-            </span>
-            <span className="text-2xl font-bold tracking-tight">
-              medmove
-            </span>
-          </div>
-
-          <div className="relative z-10 max-w-xl py-4">
-            <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-medium tracking-wide text-white/90">
-              <ShieldCheck size={14} />
-              HEALTH NETWORK PLATFORM
-            </span>
-
-            <h2 className="max-w-lg text-4xl font-semibold leading-[1.12] tracking-tight xl:text-5xl">
-              Better access.
-              <br />
-              Smarter distribution.
-              <br />
-              <span className="text-[#d4e2c9]">
-                Healthier communities.
-              </span>
-            </h2>
-
-            <p className="mt-6 max-w-md text-base leading-7 text-white/75">
-              Connect hospitals, make medicine inventory visible, and help
-              teams explore responsible redistribution across the network.
-            </p>
-
-            <div className="mt-6 grid max-w-md grid-cols-2 gap-3">
-              <div className="rounded-xl border border-white/15 bg-white/[0.07] p-4">
-                <Building2 size={20} className="mb-3 text-[#d4e2c9]" />
-                <p className="text-sm font-semibold">Shared visibility</p>
-                <p className="mt-1 text-xs leading-5 text-white/65">
-                  A clearer view of stock across facilities.
-                </p>
-              </div>
-              <div className="rounded-xl border border-white/15 bg-white/[0.07] p-4">
-                <ShieldCheck size={20} className="mb-3 text-[#d4e2c9]" />
-                <p className="text-sm font-semibold">Careful by design</p>
-                <p className="mt-1 text-xs leading-5 text-white/65">
-                  Eligibility and quality stay in focus.
-                </p>
-              </div>
+              <AccessScopeCard />
             </div>
-          </div>
 
-          <p className="relative z-10 text-xs text-white/55">
-            MedMove · Medicine redistribution decision support
-          </p>
+            <footer className="mm-login-editorial-footer">
+              <Wordmark compact />
+              <span>Medicine redistribution decision support</span>
+            </footer>
+          </div>
         </section>
 
-        {/* Right login panel */}
-        <section className="relative flex min-h-screen items-center justify-center px-5 py-8 sm:px-8 lg:px-10">
-          <div className="relative z-10 w-full max-w-[520px]">
-            {/* Mobile logo */}
-            <div className="mb-6 flex items-center lg:hidden">
-              <div className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-[#193632]">
-                <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#1f625d] text-white">
-                  <Network size={20} />
-                </span>
-                medmove
-              </div>
+        {/* Login panel */}
+        <section className="mm-login-form-panel" aria-labelledby="login-title">
+          <div className="mm-login-form-wrap">
+            <div className="mm-login-mobile-wordmark">
+              <Wordmark />
             </div>
 
-            <div className="mb-6">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#5c8277]">
-                Welcome back to MedMove
-              </p>
-              <h1
-                id="login-title"
-                className="text-3xl font-semibold leading-tight tracking-tight text-[#193632] sm:text-[34px]"
-              >
-                Sign in to your account
-              </h1>
-              <p className="mt-2 text-sm leading-6 text-[#71827d]">
-                Access your hospital inventory and network dashboard.
-              </p>
+            <div className="mm-login-form-heading">
+              <p className="mm-login-eyebrow">WELCOME BACK TO MEDMOVE</p>
+              <h1 id="login-title">Sign in to your account</h1>
+              <p>Access your hospital inventory and network dashboard.</p>
             </div>
 
-            {/* Email/password login */}
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-1 block text-xs font-medium text-[#193632]"
-                >
-                  Work email
-                </label>
-                <div className="flex items-center rounded-md border border-[#ded7c8] bg-[#faf8f2] px-3 transition-colors focus-within:border-[#1f625d] focus-within:ring-2 focus-within:ring-[#1f625d]/10">
-                  <Mail
-                    size={16}
-                    className="mr-2 shrink-0 text-[#71827d]"
-                    aria-hidden="true"
-                  />
+            <form className="mm-login-form" onSubmit={handleSubmit}>
+              <div className="mm-login-field">
+                <label htmlFor="email">Work email</label>
+                <div className="mm-login-input-wrap">
+                  <Mail size={17} aria-hidden="true" />
                   <input
                     id="email"
                     type="email"
                     autoComplete="username"
                     placeholder="you@hospital.org"
-                    className="w-full min-w-0 bg-transparent py-2.5 text-sm text-[#193632] outline-none placeholder:text-[#8b9690]"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     required
@@ -186,25 +140,15 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="password"
-                  className="mb-1 block text-xs font-medium text-[#193632]"
-                >
-                  Password
-                </label>
-                <div className="flex items-center rounded-md border border-[#ded7c8] bg-[#faf8f2] px-3 transition-colors focus-within:border-[#1f625d] focus-within:ring-2 focus-within:ring-[#1f625d]/10">
-                  <LockKeyhole
-                    size={16}
-                    className="mr-2 shrink-0 text-[#71827d]"
-                    aria-hidden="true"
-                  />
+              <div className="mm-login-field">
+                <label htmlFor="password">Password</label>
+                <div className="mm-login-input-wrap">
+                  <LockKeyhole size={17} aria-hidden="true" />
                   <input
                     id="password"
                     type="password"
                     autoComplete="current-password"
                     placeholder="Enter your password"
-                    className="w-full min-w-0 bg-transparent py-2.5 text-sm text-[#193632] outline-none placeholder:text-[#8b9690]"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     required
@@ -213,34 +157,30 @@ export default function LoginPage() {
               </div>
 
               {error && (
-                <div
-                  className="rounded-md border border-[#e7c8bd] bg-[#fbefea] px-3 py-2.5 text-sm leading-5 text-[#9b4234]"
-                  role="alert"
-                >
+                <div className="mm-login-error" role="alert">
                   {error}
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1f625d] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#194f4b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3efe6] disabled:cursor-not-allowed disabled:opacity-60"
-              >
+              <button className="mm-login-submit" type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    <span className="mm-login-spinner" aria-hidden="true" />
                     Signing in…
                   </>
                 ) : (
-                  'Sign in'
+                  <>
+                    Sign in <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
+                  </>
                 )}
               </button>
             </form>
 
-            <div className="mt-6 flex items-start justify-center gap-2 border-t border-[#ded7c8] pt-4 text-center text-[10px] leading-4 text-[#8b9690]">
-              <ShieldCheck size={14} className="mt-0.5 shrink-0" />
+            <div className="mm-login-security-note">
+              <ShieldCheck size={15} aria-hidden="true" />
               <span>
-                MedMove · Medicine redistribution decision support. Do not enter patient information.
+                MedMove · Medicine redistribution decision support. Do not enter patient
+                information.
               </span>
             </div>
           </div>

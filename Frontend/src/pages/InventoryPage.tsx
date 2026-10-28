@@ -1,4 +1,3 @@
-
 import {
   AlertTriangle,
   Boxes,
@@ -282,7 +281,7 @@ export default function InventoryPage() {
       {/* Page heading */}
       <section className="flex flex-col justify-between gap-5 border-b border-[#ded7c8] pb-7 sm:flex-row sm:items-end">
         <div>
-          <p className="mb-3 font-mono text-xs text-[#71827d]">
+          <p className="mb-3 font-mono text-sm text-[#71827d]">
             Stock management
           </p>
 
@@ -290,7 +289,7 @@ export default function InventoryPage() {
             {isCoordinator ? 'Network inventory' : 'Inventory batches'}
           </h2>
 
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[#71827d] sm:text-base">
+          <p className="mt-3 max-w-2xl text-base leading-7 text-[#71827d] sm:text-lg">
             {isCoordinator
               ? 'Review medicine availability, expiry and quality across demo facilities.'
               : 'Track medicine batches, quantities, expiry dates and quality at your facility.'}
@@ -298,7 +297,7 @@ export default function InventoryPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 border-b border-dashed border-[#ded7c8] px-1 py-2 text-xs text-[#71827d]">
+          <span className="inline-flex items-center gap-2 border-b border-dashed border-[#ded7c8] px-1 py-2 text-sm text-[#71827d]">
             <span className="h-2 w-2 rounded-full bg-amber-500" />
             Live inventory
           </span>
@@ -306,7 +305,7 @@ export default function InventoryPage() {
           {!isCoordinator && (
             <button
               type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1f625d] px-4 py-3 text-sm font-medium text-white hover:bg-[#174d49] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1f625d] px-4 py-3 text-base font-medium text-white hover:bg-[#174d49] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={startCreate}
             >
               <PackagePlus size={16} />
@@ -316,7 +315,7 @@ export default function InventoryPage() {
 
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 px-3 py-3 text-sm text-[#71827d] hover:text-[#193632] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center gap-2 px-3 py-3 text-base text-[#71827d] hover:text-[#193632] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2"
             onClick={() => void loadInventory(isCoordinator ? undefined : facilityCode)}
           >
             <RefreshCw size={15} />
@@ -328,7 +327,7 @@ export default function InventoryPage() {
       {/* Feedback message */}
       {notice && (
         <div
-          className={`flex items-start gap-3 rounded-md border px-4 py-3 text-sm ${
+          className={`flex items-start gap-3 rounded-md border px-4 py-3 text-base ${
             noticeType === 'success'
               ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
               : 'border-rose-200 bg-rose-50 text-rose-800'
@@ -357,7 +356,7 @@ export default function InventoryPage() {
       {/* Summary cards */}
       <section className="grid grid-cols-1 border-y border-[#ded7c8] sm:grid-cols-2 xl:grid-cols-4">
         <article className="min-w-0 border-b border-[#ded7c8] px-4 py-5 sm:border-r xl:border-b-0 xl:py-6">
-          <div className="flex items-center justify-between gap-3 text-sm text-[#71827d]">
+          <div className="flex items-center justify-between gap-3 text-base text-[#71827d]">
             <span>Total batches</span>
             <span className="hidden">
               <Boxes size={18} />
@@ -368,13 +367,13 @@ export default function InventoryPage() {
             {formatNumber(visibleBatches.length)}
           </strong>
 
-          <p className="mt-3 text-xs leading-5 text-[#71827d]">
+          <p className="mt-3 text-sm leading-6 text-[#71827d]">
             Recorded medicine lots
           </p>
         </article>
 
         <article className="min-w-0 border-b border-[#ded7c8] px-4 py-5 sm:border-r xl:border-b-0 xl:py-6">
-          <div className="flex items-center justify-between gap-3 text-sm text-[#71827d]">
+          <div className="flex items-center justify-between gap-3 text-base text-[#71827d]">
             <span>Units on hand</span>
             <span className="hidden">
               <PackagePlus size={18} />
@@ -385,13 +384,13 @@ export default function InventoryPage() {
             {formatNumber(totalUnits)}
           </strong>
 
-          <p className="mt-3 text-xs leading-5 text-[#71827d]">
+          <p className="mt-3 text-sm leading-6 text-[#71827d]">
             Across visible batches
           </p>
         </article>
 
         <article className="min-w-0 border-b border-[#ded7c8] px-4 py-5 sm:border-r xl:border-b-0 xl:py-6">
-          <div className="flex items-center justify-between gap-3 text-sm text-[#71827d]">
+          <div className="flex items-center justify-between gap-3 text-base text-[#71827d]">
             <span>Expiring in 30 days</span>
             <span className="hidden">
               <CalendarClock size={18} />
@@ -402,13 +401,13 @@ export default function InventoryPage() {
             {formatNumber(expiringCount)}
           </strong>
 
-          <p className="mt-3 text-xs leading-5 text-[#71827d]">
+          <p className="mt-3 text-sm leading-6 text-[#71827d]">
             Batches approaching expiry
           </p>
         </article>
 
         <article className="min-w-0 border-b border-[#ded7c8] px-4 py-5 sm:border-r xl:border-b-0 xl:py-6">
-          <div className="flex items-center justify-between gap-3 text-sm text-[#71827d]">
+          <div className="flex items-center justify-between gap-3 text-base text-[#71827d]">
             <span>Quality exceptions</span>
             <span className="hidden">
               <ShieldCheck size={18} />
@@ -419,7 +418,7 @@ export default function InventoryPage() {
             {formatNumber(exceptionCount)}
           </strong>
 
-          <p className="mt-3 text-xs leading-5 text-[#71827d]">
+          <p className="mt-3 text-sm leading-6 text-[#71827d]">
             {formatNumber(expiredCount)} expired batches identified
           </p>
         </article>
@@ -436,7 +435,7 @@ export default function InventoryPage() {
             Check eligibility before redistribution
           </h3>
 
-          <p className="mt-1 text-sm leading-6 text-[#71827d]">
+          <p className="mt-1 text-base leading-7 text-[#71827d]">
             Only eligible, unexpired stock should be considered. Final
             transfer feasibility also depends on reserves, shelf life,
             routes and budget.
@@ -444,7 +443,7 @@ export default function InventoryPage() {
         </div>
 
         <div className="sm:min-w-40 sm:border-l sm:border-[#ded7c8] sm:pl-5">
-          <p className="text-xs text-[#71827d]">
+          <p className="text-sm text-[#71827d]">
             Eligible, unexpired units
           </p>
 
@@ -462,7 +461,7 @@ export default function InventoryPage() {
               Medicine batches
             </h3>
 
-            <p className="mt-1 text-sm text-[#71827d]">
+            <p className="mt-1 text-base text-[#71827d]">
               Showing {formatNumber(filteredBatches.length)} of{' '}
               {formatNumber(visibleBatches.length)}
               {isCoordinator ? ' network batches' : ' facility batches'}
@@ -473,7 +472,7 @@ export default function InventoryPage() {
             <Search size={16} className="shrink-0" />
 
             <input
-              className="w-full min-w-0 bg-transparent py-2.5 text-sm text-[#304944] outline-none placeholder:text-[#8b9690]"
+              className="w-full min-w-0 bg-transparent py-2.5 text-base text-[#304944] outline-none placeholder:text-[#8b9690]"
               aria-label="Search inventory"
               placeholder="Search medicine, lot or batch"
               value={search}
@@ -496,12 +495,12 @@ export default function InventoryPage() {
         <div className="flex flex-wrap items-end gap-3 border-b border-[#ded7c8] py-4">
           {isCoordinator && (
             <label className="grid min-w-[180px] flex-1 gap-1.5 sm:flex-none">
-              <span className="text-xs font-medium text-[#71827d]">
+              <span className="text-sm font-medium text-[#71827d]">
                 Facility
               </span>
 
               <select
-                className="rounded-md border border-[#ded7c8] bg-[#f3efe6] px-3 py-2.5 text-sm text-[#304944] outline-none focus:border-[#0d9488] focus:ring-2 focus:ring-[#0d9488]/10"
+                className="rounded-md border border-[#ded7c8] bg-[#f3efe6] px-3 py-2.5 text-base text-[#304944] outline-none focus:border-[#0d9488] focus:ring-2 focus:ring-[#0d9488]/10"
                 value={facilityFilter}
                 onChange={(event) => setFacilityFilter(event.target.value)}
               >
@@ -520,12 +519,12 @@ export default function InventoryPage() {
           )}
 
           <label className="grid min-w-[160px] flex-1 gap-1.5 sm:flex-none">
-            <span className="text-xs font-medium text-[#71827d]">
+            <span className="text-sm font-medium text-[#71827d]">
               Quality status
             </span>
 
             <select
-              className="rounded-md border border-[#ded7c8] bg-[#f3efe6] px-3 py-2.5 text-sm text-[#304944] outline-none focus:border-[#0d9488] focus:ring-2 focus:ring-[#0d9488]/10"
+              className="rounded-md border border-[#ded7c8] bg-[#f3efe6] px-3 py-2.5 text-base text-[#304944] outline-none focus:border-[#0d9488] focus:ring-2 focus:ring-[#0d9488]/10"
               value={qualityFilter}
               onChange={(event) => setQualityFilter(event.target.value)}
             >
@@ -540,12 +539,12 @@ export default function InventoryPage() {
           </label>
 
           <label className="grid min-w-[160px] flex-1 gap-1.5 sm:flex-none">
-            <span className="text-xs font-medium text-[#71827d]">
+            <span className="text-sm font-medium text-[#71827d]">
               Expiry
             </span>
 
             <select
-              className="rounded-md border border-[#ded7c8] bg-[#f3efe6] px-3 py-2.5 text-sm text-[#304944] outline-none focus:border-[#0d9488] focus:ring-2 focus:ring-[#0d9488]/10"
+              className="rounded-md border border-[#ded7c8] bg-[#f3efe6] px-3 py-2.5 text-base text-[#304944] outline-none focus:border-[#0d9488] focus:ring-2 focus:ring-[#0d9488]/10"
               value={expiryFilter}
               onChange={(event) => setExpiryFilter(event.target.value)}
             >
@@ -558,7 +557,7 @@ export default function InventoryPage() {
 
           <button
             type="button"
-            className="rounded-md px-3 py-2.5 text-sm font-medium text-[#1f625d] hover:bg-[#e4e9df]"
+            className="rounded-md px-3 py-2.5 text-base font-medium text-[#1f625d] hover:bg-[#e4e9df]"
             onClick={resetFilters}
           >
             Clear filters
@@ -577,7 +576,7 @@ export default function InventoryPage() {
                 : 'No matching batches'}
             </h3>
 
-            <p className="mt-2 max-w-md text-sm leading-6 text-[#71827d]">
+            <p className="mt-2 max-w-md text-base leading-7 text-[#71827d]">
               {visibleBatches.length === 0
                 ? 'Add a batch to start tracking this facility’s inventory.'
                 : 'Try another search or clear the selected filters.'}
@@ -586,7 +585,7 @@ export default function InventoryPage() {
             {!isCoordinator && visibleBatches.length === 0 && (
               <button
                 type="button"
-                className="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-[#1f625d] px-4 py-3 text-sm font-medium text-white hover:bg-[#174d49] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2"
+                className="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-[#1f625d] px-4 py-3 text-base font-medium text-white hover:bg-[#174d49] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2"
                 onClick={startCreate}
               >
                 <PackagePlus size={16} />
@@ -607,7 +606,7 @@ export default function InventoryPage() {
           />
         )}
 
-        <div className="flex flex-col gap-2 border-t border-[#ded7c8] px-4 py-3 text-xs text-[#71827d] sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex flex-col gap-2 border-t border-[#ded7c8] px-4 py-3 text-sm text-[#71827d] sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <span className="inline-flex items-center gap-2">
             <ShieldCheck size={14} className="shrink-0" />
             {isCoordinator
@@ -619,7 +618,7 @@ export default function InventoryPage() {
         </div>
       </section>
 
-      <p className="flex items-start gap-2 text-xs leading-5 text-[#71827d]">
+      <p className="flex items-start gap-2 text-sm leading-6 text-[#71827d]">
         <RefreshCw size={13} className="mt-0.5 shrink-0" />
         Inventory changes are persisted by the backend and may trigger
         synchronous optimization.
@@ -647,7 +646,7 @@ export default function InventoryPage() {
           >
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <p className="mb-3 font-mono text-xs text-[#71827d]">
+                <p className="mb-3 font-mono text-sm text-[#71827d]">
                   {editing ? 'Update inventory' : 'New inventory'}
                 </p>
 
@@ -660,7 +659,7 @@ export default function InventoryPage() {
                     : 'Add inventory batch'}
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-[#71827d]">
+                <p className="mt-2 text-base leading-7 text-[#71827d]">
                   {editing
                     ? 'Update this batch’s quantity, expiry or quality status.'
                     : `Add a medicine batch to ${facilityCode || 'your facility'}.`}

@@ -1,342 +1,445 @@
-
-import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUpRight,
-  Building2,
-  Network,
-  ShieldCheck,
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import './HomePage.css';
 
-const galleryImages = [
+const checks = [
   {
-    src: '/hero1.png',
-    alt: 'Medicine waste and surplus inventory across hospitals',
-    label: '01 / The challenge',
+    title: 'The medicine is fit to use',
+    description:
+      'Only batches marked eligible. Anything quality-flagged stays where it is.',
   },
   {
-    src: '/hero2.png',
-    alt: 'The challenge of affordable access to medicines',
-    label: '02 / Why it matters',
+    title: 'It will still be in date on arrival',
+    description:
+      "The destination's shelf-life rule is applied at the day the batch lands, not today.",
   },
   {
-    src: '/hero3.png',
-    alt: 'MedMove connecting hospital surplus with facilities that need medicines',
-    label: '03 / The MedMove approach',
+    title: 'The sender keeps its reserve',
+    description:
+      'No hospital is pushed below the minimum stock it has set aside for that medicine.',
+  },
+  {
+    title: 'The receiver only gets what it needs',
+    description: 'A destination is never sent more than its shortage.',
+  },
+  {
+    title: 'A real route exists',
+    description:
+      'Direct routes only, with shared capacity across every medicine on that route. A route one way does not imply the other.',
+  },
+  {
+    title: 'It fits the budget',
+    description:
+      'Quantity times cost per unit, added up, stays under the figure you set.',
   },
 ];
 
-function GalleryImage({
-  image,
-  index,
-}: {
-  image: (typeof galleryImages)[number];
-  index: number;
-}) {
-  const figureRef = useRef<HTMLElement | null>(null);
-  const [isVisible, setIsVisible] = useState(index === 0);
-  const [revealColor, setRevealColor] = useState(false);
+const timeline = [
+  {
+    label: 'FIRST TIME',
+    title: 'The coordinator runs it once',
+    description:
+      'Pick a planning date and a budget. That gives everyone a starting plan to look at.',
+  },
+  {
+    label: 'AFTER THAT',
+    title: 'A hospital edits a batch',
+    description:
+      'Quantity, expiry date or quality status, at its own facility only.',
+  },
+  {
+    label: 'AUTOMATIC',
+    title: 'MedMove checks if it matters',
+    description:
+      'No real change, no shortage, or the same snapshot already analysed: it skips, and says why.',
+  },
+  {
+    label: 'AUTOMATIC',
+    title: 'One run covers all ten hospitals',
+    description: 'Not site by site. The whole network is solved together.',
+  },
+  {
+    label: 'THEN IT STOPS',
+    title: 'A person reviews every proposal',
+    description:
+      'The source sees it as outgoing, the destination as incoming. Real inventory is untouched.',
+    final: true,
+  },
+];
 
-  useEffect(() => {
-    const element = figureRef.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          setRevealColor(true);
-          observer.unobserve(element);
-        }
-      },
-      {
-        threshold: 0.2,
-        rootMargin: '0px 0px -30px 0px',
-      },
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
+function Wordmark({ footer = false }: { footer?: boolean }) {
   return (
-    <figure
-      ref={figureRef}
-      className={`mx-5 transition-[opacity,transform] duration-1000 ease-out motion-reduce:transition-none sm:mx-10 ${
-        isVisible
-          ? 'translate-y-0 opacity-100'
-          : 'translate-y-8 opacity-0'
-      }`}
-      style={{ transitionDelay: `${Math.min(index * 100, 200)}ms` }}
+    <Link
+      to="/"
+      aria-label="MedMove home"
+      className={`mm-wordmark${footer ? ' mm-wordmark--footer' : ''}`}
     >
-      <div className="mx-auto max-w-[1000px]">
-        <div
-          className="group relative rounded-2xl bg-transparent transition-[transform] duration-500 ease-out hover:scale-[1.004] motion-reduce:transition-none sm:rounded-3xl"
-          onMouseEnter={() => setRevealColor(true)}
-          onMouseLeave={() => setRevealColor(false)}
-        >
-          {/* Minimal frame that blends with the beige page */}
-          <div className="relative overflow-hidden rounded-2xl bg-[#f1efe6] ring-1 ring-[#193632]/[0.07] transition-[box-shadow] duration-700 group-hover:shadow-[0_16px_38px_rgba(25,54,50,0.09)] sm:rounded-3xl">
-            {/* Full-colour image underneath */}
-            <img
-              src={image.src}
-              alt={image.alt}
-              loading={index === 0 ? 'eager' : 'lazy'}
-              decoding="async"
-              className="block h-auto w-full rounded-2xl object-contain sm:rounded-3xl"
-            />
+      <img
+        src="/logo.png"
+        alt="MedMove"
+        className={
+          footer
+            ? 'block h-[30px] w-auto object-contain'
+            : 'block h-[40px] w-auto object-contain'
+        }
+      />
+    </Link>
+  );
+}
 
-            {/* Grayscale layer fades away when scrolled into view or hovered */}
-            <img
-              src={image.src}
-              alt=""
-              aria-hidden="true"
-              loading={index === 0 ? 'eager' : 'lazy'}
-              decoding="async"
-              className={`pointer-events-none absolute inset-0 block h-full w-full rounded-2xl object-contain transition-opacity duration-[1400ms] ease-in-out motion-reduce:transition-none sm:rounded-3xl ${
-                revealColor
-                  ? 'opacity-0'
-                  : 'opacity-100 group-hover:opacity-0'
-              }`}
-              style={{
-                filter: 'grayscale(1)',
-              }}
-            />
+function TransferProposal() {
+  return (
+    <div
+      className="mm-hero-visual"
+      aria-label="Illustration of a transfer proposal awaiting review"
+    >
+      <p className="mm-visual-caption">what a suggestion looks like</p>
 
-            {/* Soft beige tint for a cohesive page-wide look */}
-            <div
-              className={`pointer-events-none absolute inset-0 rounded-2xl bg-[#e8e2d2]/[0.10] transition-opacity duration-[1400ms] ease-in-out motion-reduce:transition-none sm:rounded-3xl ${
-                revealColor ? 'opacity-0' : 'opacity-100'
-              }`}
-            />
+      <article className="mm-transfer-slip">
+        <div className="mm-slip-topline">
+          <span>TRANSFER PROPOSAL</span>
+          <span>NO. 001</span>
+        </div>
 
-            {/* Gentle edge blending — no heavy visible border */}
-            <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_0_22px_rgba(241,239,230,0.12)] sm:rounded-3xl" />
+        <div className="mm-slip-heading">
+          <span className="mm-slip-quantity">80</span>
+          <span className="mm-slip-unit">units of MED1</span>
+        </div>
+
+        <div className="mm-review-stamp">
+          PENDING
+          <br />
+          REVIEW
+          <small>NOTHING HAS MOVED</small>
+        </div>
+
+        <div className="mm-slip-rows">
+          <div>
+            <span>From</span>
+            <strong>H01</strong>
+          </div>
+          <div>
+            <span>To</span>
+            <strong>H02</strong>
+          </div>
+          <div>
+            <span>Medicine</span>
+            <strong>Paracetamol 500 mg</strong>
+          </div>
+          <div>
+            <span>Route</span>
+            <strong>Direct, 1 day</strong>
+          </div>
+          <div>
+            <span>Shelf-life at arrival</span>
+            <strong>Rule met</strong>
+          </div>
+          <div>
+            <span>Est. cost</span>
+            <strong>₹204.00</strong>
+          </div>
+          <div>
+            <span>Still short after this</span>
+            <strong>100 units</strong>
           </div>
         </div>
 
-        <figcaption className="flex items-center gap-3 px-1 pt-3 text-[#397568]/90 sm:px-2 sm:pt-4">
-          <span className="whitespace-nowrap text-xs font-semibold tracking-[0.12em] sm:text-sm">
-            {image.label}
-          </span>
-          <span className="h-px flex-1 bg-[#193632]/[0.09]" />
-        </figcaption>
+        <div className="mm-slip-signature">
+          <span>Reviewed by</span>
+          <i />
+        </div>
+      </article>
+
+      <div className="mm-uncovered-note">
+        <div className="mm-note-heading">
+          <span>COULD NOT BE COVERED</span>
+          <strong>40 units short</strong>
+        </div>
+
+        <p className="mm-note-medicine">H02 · MED3</p>
+
+        <p>
+          No eligible route from a hospital with spare stock. It stays on the
+          list instead of being quietly dropped.
+        </p>
       </div>
-    </figure>
+
+      <p className="mm-visual-footnote">
+        and the ones it can’t
+        <br />
+        solve are shown too
+      </p>
+    </div>
+  );
+}
+
+function ArithmeticLedger() {
+  return (
+    <section className="mm-ledger" aria-labelledby="mm-ledger-title">
+      <div className="mm-shell mm-ledger-inner">
+        <div className="mm-ledger-intro">
+          <h2 id="mm-ledger-title">
+            The arithmetic,
+            <br />
+            written out.
+          </h2>
+
+          <p>
+            Same numbers as the slip above. The optimizer does this for every
+            facility and medicine at once, so nobody has to.
+          </p>
+        </div>
+
+        <div
+          className="mm-arithmetic"
+          aria-label="200 minus 20 equals 180, minus 80 equals 100 still short"
+        >
+          <div className="mm-math-row">
+            <span className="mm-math-op" />
+            <strong>200</strong>
+            <span>H02’s target stock</span>
+          </div>
+
+          <div className="mm-math-row">
+            <span className="mm-math-op">−</span>
+            <strong>20</strong>
+            <span>usable stock it has now</span>
+          </div>
+
+          <div className="mm-math-row mm-math-result">
+            <span className="mm-math-op">=</span>
+            <strong>180</strong>
+            <span>short</span>
+          </div>
+
+          <div className="mm-math-row">
+            <span className="mm-math-op">−</span>
+            <strong>80</strong>
+            <span>what H01 can safely send</span>
+          </div>
+
+          <div className="mm-math-row mm-math-final">
+            <span className="mm-math-op">=</span>
+            <strong>
+              <span>100</span>
+            </strong>
+            <span>still short. Shown, never hidden.</span>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f1efe6] text-[#193632]">
-      {/* HERO: LOOPING VIDEO BACKGROUND */}
-      <section className="relative isolate min-h-[100svh] overflow-hidden bg-[#193632]">
-        <video
-          className="absolute inset-0 -z-30 h-full w-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        >
-          <source src="/home.mp4" type="video/mp4" />
-        </video>
+    <main className="mm-home">
+      <header className="mm-header">
+        <nav className="mm-shell mm-nav" aria-label="Main navigation">
+          <Wordmark />
 
-        <div className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-r from-[#081f1d]/75 via-[#102d29]/50 to-[#102d29]/30" />
-        <div className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-b from-[#081f1d]/25 via-[#081f1d]/10 to-[#081f1d]/45" />
-
-        {/* NAVBAR OVER VIDEO */}
-        <header className="absolute inset-x-0 top-0 z-30 bg-transparent">
-          <nav className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-10">
-            <Link
-              to="/"
-              aria-label="MedMove home"
-              className="group inline-flex items-center border-0 bg-transparent p-0 shadow-none transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <img
-                src="/logoo.png"
-                alt="MedMove"
-                className="h-[35px] w-auto object-contain sm:h-[39px]"
-              />
-            </Link>
-
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/35 bg-white/20 px-5 py-2.5 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition hover:border-white/50 hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
+          <div className="mm-nav-links">
+            <a href="#idea">The idea</a>
+            <a href="#checks">What it checks</a>
+            <a href="#audience">Who sees what</a>
+            <Link to="/login" className="mm-nav-signin">
               Sign in
-              <ArrowUpRight size={16} />
             </Link>
-          </nav>
-        </header>
+          </div>
+        </nav>
+      </header>
 
-        {/* HERO CONTENT */}
-        <div className="mx-auto flex min-h-[100svh] max-w-[1440px] items-center justify-center px-5 pb-12 pt-28 sm:px-8 sm:pb-12 sm:pt-32 lg:px-10 lg:py-24">
-          <div className="mx-auto flex w-full max-w-4xl flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-[#102d29]/40 px-4 py-2.5 text-[11px] font-semibold tracking-[0.18em] text-[#e0eee6] backdrop-blur-md sm:text-xs">
-              <ShieldCheck size={15} />
-              HEALTH NETWORK PLATFORM
-            </div>
+      <section className="mm-hero" id="idea">
+        <div className="mm-shell mm-hero-grid">
+          <div className="mm-hero-copy">
+            <p className="mm-eyebrow">FOR HOSPITAL NETWORKS</p>
 
-       <h1 className="mt-7 w-full max-w-4xl text-center text-[32px] font-semibold leading-[1.06] tracking-[-0.055em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:text-[44px] lg:text-[58px] xl:text-[4.8125rem]">
-  Better access.
-  <br />
-  <span className="text-[#a5d9c5]">
-    Smarter distribution.
-  </span>
-</h1>
+            <h1>
+              One hospital has
+              <br />
+              too much. Another
+              <br />
+              is <em>running short.</em>
+            </h1>
 
-          
-
-           
-
-           
-
-            <p className="mt-6 mx-auto max-w-2xl text-center text-base leading-8 text-white drop-shadow-[0_1px_5px_rgba(0,0,0,0.85)] sm:text-lg sm:leading-9 lg:text-xl">
-              Identify medicine shortages and usable surpluses across your
-              hospital network. Explore transparent, constraint-aware
-              redistribution recommendations while keeping every decision
-              under human review.
+            <p className="mm-hero-description">
+              MedMove looks at every hospital in your network at the same time
+              and suggests which transfers would actually work. It checks the
+              expiry dates, the stock each site has to keep, the routes and the
+              budget. Then it hands the suggestion to a person.
             </p>
 
-            <div className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:items-center">
-              <Link
-                to="/login"
-                className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl bg-[#20645f] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-black/10 transition duration-200 hover:-translate-y-0.5 hover:bg-[#1b5752] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#193632]"
-              >
+            <div className="mm-hero-actions">
+              <Link to="/login" className="mm-button mm-button-dark">
                 Sign in to MedMove
-                <ArrowRight size={17} />
+                <ArrowRight size={14} strokeWidth={1.8} />
               </Link>
 
-              <a
-                href="#gallery"
-                className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              >
-                Explore our mission
-                <ArrowDown size={16} />
+              <a href="#example" className="mm-text-link">
+                See a worked example
               </a>
             </div>
+          </div>
 
-            <div className="mt-20 grid w-full max-w-3xl grid-cols-1 gap-4 border-t border-white/20 pt-6 sm:grid-cols-3 sm:gap-5">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-[#b8e1ce]">
-                  <Building2 size={19} />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-white">
-                    Network-wide
-                  </p>
-                  <p className="mt-1 text-xs text-white/65">
-                    Inventory visibility
-                  </p>
-                </div>
-              </div>
+          <TransferProposal />
+        </div>
+      </section>
 
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-[#b8e1ce]">
-                  <Network size={19} />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-white">
-                    Constraint-aware
-                  </p>
-                  <p className="mt-1 text-xs text-white/65">
-                    Transfer recommendations
-                  </p>
-                </div>
-              </div>
+      <section className="mm-example mm-shell" id="example">
+        <p className="mm-section-kicker">A PLAIN EXAMPLE</p>
 
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-[#b8e1ce]">
-                  <ShieldCheck size={19} />
-                </span>
+        <div className="mm-example-copy">
+          <h2>
+            Hospital H02 needs 200 units of paracetamol. It has{' '}
+            <span className="mm-highlight">20 usable.</span> Hospital H01, two
+            hours away, has more than its own plan requires.
+          </h2>
+
+          <p>
+            Working out how many H01 can send without leaving itself short, and
+            whether the batch is still in date when it lands, is slow to do by
+            hand across ten sites. It is what MedMove does on every run.
+          </p>
+        </div>
+      </section>
+
+      <ArithmeticLedger />
+
+      <section className="mm-checks-section" id="checks">
+        <div className="mm-shell mm-two-column">
+          <div className="mm-section-intro">
+            <h2>Six things it checks before it suggests anything.</h2>
+
+            <p>
+              These are hard rules, not preferences. A proposal that breaks one
+              is never created.
+            </p>
+
+            <p className="mm-aside-note">
+              If a full plan is impossible, it says so and shows what is left.
+              It never invents stock.
+            </p>
+          </div>
+
+          <div className="mm-check-list">
+            {checks.map((check, index) => (
+              <article className="mm-check-row" key={check.title}>
+                <span className="mm-list-number">{index + 1}</span>
+
                 <div>
-                  <p className="text-sm font-semibold text-white">
-                    Human-reviewed
-                  </p>
-                  <p className="mt-1 text-xs text-white/65">
-                    Responsible decisions
-                  </p>
+                  <h3>{check.title}</h3>
+                  <p>{check.description}</p>
                 </div>
-              </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mm-process-section">
+        <div className="mm-shell mm-process-grid">
+          <div className="mm-process-intro">
+            <h2>It runs when something actually changes.</h2>
+
+            <p>
+              Nobody has to remember to press a button after every delivery. A
+              relevant stock edit starts the check by itself, and tells you
+              when it chose not to run.
+            </p>
+
+            <blockquote>
+              If the optimizer fails after you save a stock change, the change
+              is still saved. You get told both things, separately.
+            </blockquote>
+          </div>
+
+          <div className="mm-timeline">
+            {timeline.map((item) => (
+              <article
+                className={`mm-timeline-item${item.final ? ' is-final' : ''}`}
+                key={item.title}
+              >
+                <span className="mm-timeline-dot" aria-hidden="true" />
+
+                <div className="mm-timeline-content">
+                  <p className="mm-timeline-label">{item.label}</p>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mm-audience-section" id="audience">
+        <div className="mm-shell">
+          <h2 className="mm-audience-heading">
+            Everyone sees their own part of the picture.
+          </h2>
+
+          <div className="mm-audience-grid">
+            <article className="mm-audience-card">
+              <p className="mm-eyebrow">HOSPITAL USER</p>
+              <h3>One facility, fully theirs</h3>
+
+              <p>
+                Keeps their own inventory up to date and sees every transfer
+                that involves them, whether they are sending or receiving. A
+                hospital can be both in the same run.
+              </p>
+
+              <p className="mm-audience-footnote">
+                Cannot see or edit another hospital’s batches, even by changing
+                an ID in the browser. The server checks, not the page.
+              </p>
+            </article>
+
+            <article className="mm-audience-card">
+              <p className="mm-eyebrow">NETWORK COORDINATOR</p>
+              <h3>The whole network</h3>
+
+              <p>
+                Sees all ten hospitals, runs the first optimization, and reads
+                every proposal along with every shortage that could not be
+                covered.
+              </p>
+
+              <p className="mm-audience-footnote">
+                Accounts of this kind are created by the administrator.
+                Signing up never grants it.
+              </p>
+            </article>
+          </div>
+
+          <div className="mm-final-cta">
+            <h2>Decide with the whole network in front of you.</h2>
+
+            <div className="mm-final-cta-copy">
+              <p>
+                Find the imbalances, check which transfers are feasible, and
+                review each one before anything happens.
+              </p>
+
+              <Link to="/login" className="mm-button mm-button-dark">
+                Sign in to MedMove
+                <ArrowRight size={14} strokeWidth={1.8} />
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CENTERED IMAGE GALLERY */}
-      <section
-        id="gallery"
-        className="scroll-mt-5 bg-gradient-to-b from-[#f1efe6] via-[#f4f2ea] to-[#f1efe6] py-10 sm:py-14 lg:py-16"
-      >
-        <div className="mb-8 px-5 sm:mb-10 sm:px-8 lg:px-10">
-          <div className="mx-auto max-w-[1080px]">
-            <p className="text-xs font-semibold tracking-[0.2em] text-[#398a78]">
-              THE MEDMOVE STORY
-            </p>
-            <h2 className="mt-3 max-w-3xl text-2xl font-semibold leading-tight tracking-[-0.04em] text-[#193632] sm:text-3xl lg:text-4xl">
-              One network. A better way forward.
-            </h2>
-          </div>
-        </div>
+      <footer className="mm-footer">
+        <div className="mm-shell mm-footer-inner">
+          <Wordmark footer />
 
-        <div className="space-y-7 sm:space-y-9 lg:space-y-10">
-          {galleryImages.map((image, index) => (
-            <GalleryImage key={image.src} image={image} index={index} />
-          ))}
-        </div>
-      </section>
-
-      {/* CLOSING CTA */}
-      <section className="bg-[#f1efe6] px-5 pb-14 pt-6 sm:px-8 sm:pb-20 lg:px-10">
-        <div className="relative mx-auto flex max-w-[1080px] flex-col items-start justify-between gap-7 overflow-hidden rounded-2xl border border-[#deded1]/70 bg-[#e9ede3] p-6 sm:rounded-3xl sm:p-10 md:flex-row md:items-center lg:p-12">
-          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[#8dbda3]/20 blur-3xl" />
-
-          <div className="relative max-w-2xl">
-            <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-[#398a78]">
-              <Network size={15} />
-              MEDICINE REDISTRIBUTION DECISION SUPPORT
-            </p>
-
-            <h2 className="mt-4 text-xl font-semibold leading-tight tracking-[-0.035em] text-[#193632] sm:text-2xl lg:text-3xl">
-              Make every inventory decision more informed.
-            </h2>
-
-            <p className="mt-3 max-w-xl text-sm leading-7 text-[#71827d] sm:text-base">
-              Identify imbalances, evaluate feasible transfers and review
-              recommendations before any action is taken.
-            </p>
-          </div>
-
-          <Link
-            to="/login"
-            className="relative inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#1f625d] px-6 py-3.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#194f4b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f625d] focus-visible:ring-offset-2"
-          >
-            Sign in to MedMove
-            <ArrowRight size={17} />
-          </Link>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-[#deded1]/70 bg-[#f8f6ef]">
-        <div className="mx-auto flex max-w-[1080px] flex-col gap-5 px-5 py-7 sm:px-8 md:flex-row md:items-center md:justify-between">
-          <Link to="/" aria-label="MedMove home" className="inline-flex w-fit items-center">
-            <img
-              src="/logoo.png"
-              alt="MedMove"
-              className="h-9 w-auto object-contain"
-            />
-          </Link>
-
-          <div className="text-xs leading-6 text-[#71827d] md:text-right">
-            <p>Medicine redistribution decision support</p>
-            <p>Synthetic demonstration data — not real operational data.</p>
-            <p>Do not enter patient information.</p>
-          </div>
+          <p>
+            Demo data is fictional. Please don’t enter patient information.
+            <br />
+            A decision-support prototype: it never buys, dispatches or receives
+            medicine.
+          </p>
         </div>
       </footer>
     </main>
